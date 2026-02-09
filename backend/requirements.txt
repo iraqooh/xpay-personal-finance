@@ -3,3 +3,7 @@ uvicorn[standard]
 sqlalchemy
 python-dotenv
 psycopg2-binary
+passlib[argon2]
+pytest
+pytest-asyncio
+httpx
