@@ -7,3 +7,4 @@ passlib[argon2]
 pytest
 pytest-asyncio
 httpx
+python-jose
