@@ -1,7 +1,6 @@
 from passlib.context import CryptContext
 from datetime import datetime, timedelta, timezone
 import os
-from dotenv import load_dotenv
 from typing import Any, Optional
 from jose import jwt
 
@@ -17,7 +16,6 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a plaintext password against a hashed password."""
     return pwd_context.verify(plain_password, hashed_password)
 
-load_dotenv()  # Load environment variables from .env file
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 60))
@@ -46,3 +44,4 @@ def create_access_token(
     # Encode the token using the SECRET_KEY and ALGORITHM
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
