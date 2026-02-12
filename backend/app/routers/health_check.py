@@ -27,5 +27,5 @@ def db_health_check(db: Session = Depends(get_db)):
     except OperationalError as e:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Database connection failed: {str(e)}"
+            detail=f"Database connection failed"
         )

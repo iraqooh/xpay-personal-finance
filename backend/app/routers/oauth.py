@@ -41,7 +41,7 @@ async def google_callback(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to authorize with Google: {str(e)}"
+            detail=f"Failed to authorize with Google"
         )
     
     userinfo: dict[str, Any] = await oauth_client.google.userinfo(token=token)

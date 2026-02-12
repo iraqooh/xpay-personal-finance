@@ -6,7 +6,7 @@ def test_password_hashing():
     """
     Test that hashing a password returns a valid hash string that is different from the plaintext password, and that hashing the same password multiple times produces different hashes due to salting.
      This ensures that the password hashing function is correctly implemented with proper salting, which is crucial for security to prevent rainbow table attacks and ensure that even if two users have the same password, their hashes will be different.
-     The assertions check that the hash is a string, is of a reasonable length (bcrypt hashes are typically around 60 characters), is not the same as the plaintext password, starts with the expected prefix for Argon2 hashes, and that hashing the same password twice does not produce the same hash.
+     The assertions check that the hash is a string, is of a reasonable length (argon2 hashes are typically around 60 characters), is not the same as the plaintext password, starts with the expected prefix for Argon2 hashes, and that hashing the same password twice does not produce the same hash.
     """
     password = "MySecurePassword123!"
 
@@ -14,7 +14,7 @@ def test_password_hashing():
 
     assert hashed is not None # Ensure we got a hash back
     assert isinstance(hashed, str) # Hash should be a string
-    assert len(hashed) > 20 # bcrypt hashes are typically around 60 characters
+    assert len(hashed) > 20 # argon2 hashes are typically around 60 characters
     assert hashed != password # Hash should not be the same as the plaintext password
     assert hashed.startswith("$argon2") # Argon2 hashes start with $argon2
     assert hashed != get_password_hash(password) # Hashing the same password should produce different hashes due to salt

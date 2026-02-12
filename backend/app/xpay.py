@@ -1,15 +1,16 @@
-from dotenv import load_dotenv
-load_dotenv()  # Load environment variables from .env file
-
 from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
 import os
 from contextlib import asynccontextmanager
 import asyncio
+import logging
+from dotenv import load_dotenv
 
 from .models import BaseModel
 from .database import db_engine
 from .routers import health_check, oauth
+
+load_dotenv()  # Load environment variables from .env file
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -20,11 +21,11 @@ async def lifespan(app: FastAPI):
     :type app: FastAPI
     """
     # Perform any startup tasks here (e.g., database connection, cache initialization)
-    print("Starting up XPay application...")
+    logging.info("Starting up XPay application...")
     await asyncio.to_thread(BaseModel.metadata.create_all, bind=db_engine)
     yield
     # Perform any shutdown tasks here (e.g., closing database connections, clearing caches)
-    print("Shutting down XPay application...")
+    logging.info("Shutting down XPay application...")
 
 xpay = FastAPI(lifespan=lifespan)
 xpay.add_middleware(

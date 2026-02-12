@@ -2,11 +2,14 @@ from fastapi.testclient import TestClient
 from unittest.mock import patch, AsyncMock
 from urllib.parse import urlparse, parse_qs
 import os
+from dotenv import load_dotenv
 
 from app.xpay import xpay # Import the FastAPI app instance
 from app.core.oauth import oauth_client # Import the OAuth client instance
 from app.routers.oauth import router # Import the OAuth router
 from app.dependencies import get_db # Import the database dependency
+
+load_dotenv()  # Load environment variables from .env file
 
 client = TestClient(xpay)
 
@@ -36,12 +39,11 @@ def test_google_login_redirect():
     assert "response_type=code" in location
     assert "redirect_uri=" in location
 
-@patch("app.core.oauth.oauth_client.google.authorize_access_token")
-@patch("app.core.oauth.oauth_client.google.userinfo")
+@patch("app.core.oauth.oauth_client.google.authorize_access_token") # Mock the token exchange method to simulate a successful token exchange with Google during the OAuth callback
+@patch("app.core.oauth.oauth_client.google.userinfo") # Mock the user info retrieval method to simulate fetching user information from Google during the OAuth callback
 def test_google_callback_new_user(
     mock_userinfo: AsyncMock,
-    mock_get_token: AsyncMock,
-    monkeypatch
+    mock_get_token: AsyncMock
 ):
     """
     Test the /auth/google/callback endpoint to ensure it correctly handles the OAuth callback from Google, processes the authorization response, and creates a new user in the database if the user does not already exist.
@@ -51,8 +53,6 @@ def test_google_callback_new_user(
     :type mock_userinfo: AsyncMock
     :param mock_get_token: Mock object for simulating the token exchange with Google during the OAuth callback.
     :type mock_get_token: AsyncMock
-    :param monkeypatch: Pytest fixture for monkeypatching dependencies during the test, used to override the database session with a mock implementation.
-    :type monkeypatch: MonkeyPatch
     """
     # Mock the token exchange and user info retrieval to simulate a successful OAuth flow
     mock_get_token.return_value = {"access_token": "fake-token"}

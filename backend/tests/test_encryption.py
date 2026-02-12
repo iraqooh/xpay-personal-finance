@@ -8,14 +8,14 @@ from app.core.encryption import encrypt, decrypt
     "", # Test with an empty string
     "a" * 1000 # Test with a long string
 ])
-def test_encryption_decrypt_roundtrip(plaintext):
+def test_encryption_decrypt_roundtrip(plaintext: str):
     """
     Test that encrypting and then decrypting a plaintext string returns the original plaintext, ensuring that the encryption and decryption functions are consistent and correctly implemented.
      The test uses a variety of input strings, including typical sensitive data, numeric strings, strings with emojis, empty strings, and long strings to ensure that the functions work correctly across different types of input.
      The assertions check that the encrypted value is a string, is significantly longer than the plaintext (indicating that encryption is occurring), is not the same as the plaintext, and that decrypting the encrypted value returns the original plaintext.
     
     :param plaintext: The plaintext string to be encrypted and decrypted in the test. This can be any string, including typical sensitive data, numeric strings, strings with emojis, empty strings, or long strings.
-    :type plaintext: LiteralString | Literal['bank_account_number_123456789', '1234.56', 'secret-note-with-emoji-😉', '']
+    :type plaintext: str
     """
     encrypted = encrypt(plaintext)
     decrypted = decrypt(encrypted)

@@ -3,14 +3,17 @@ from datetime import datetime, timedelta, timezone
 import os
 from typing import Any, Optional
 from jose import jwt
+from dotenv import load_dotenv
+
+load_dotenv()  # Load environment variables from .env file
 
 # Password hashing context configuration
-# Using bcrypt for secure password hashing with automatic handling of salt and work factor
+# Using argon2 for secure password hashing with automatic handling of salt and work factor
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 def get_password_hash(password: str) -> str:
     """
-    Hash a plaintext password using the configured password hashing algorithm (bcrypt).
+    Hash a plaintext password using the configured password hashing algorithm (argon2).
     
     :param password: The plaintext password to be hashed.
     :type password: str
@@ -21,7 +24,7 @@ def get_password_hash(password: str) -> str:
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
-    Verify a plaintext password against a hashed password using the configured password hashing algorithm (bcrypt).
+    Verify a plaintext password against a hashed password using the configured password hashing algorithm (argon2).
     
     :param plain_password: The plaintext password to verify.
     :type plain_password: str
