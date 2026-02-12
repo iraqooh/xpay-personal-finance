@@ -9,11 +9,27 @@ from jose import jwt
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 def get_password_hash(password: str) -> str:
-    """Hash a plaintext password using the configured password hashing context."""
+    """
+    Hash a plaintext password using the configured password hashing algorithm (bcrypt).
+    
+    :param password: The plaintext password to be hashed.
+    :type password: str
+    :return: The hashed password as a string.
+    :rtype: str
+    """
     return pwd_context.hash(password)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify a plaintext password against a hashed password."""
+    """
+    Verify a plaintext password against a hashed password using the configured password hashing algorithm (bcrypt).
+    
+    :param plain_password: The plaintext password to verify.
+    :type plain_password: str
+    :param hashed_password: The hashed password to compare against.
+    :type hashed_password: str
+    :return: True if the password is correct, False otherwise.
+    :rtype: bool
+    """
     return pwd_context.verify(plain_password, hashed_password)
 
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -25,7 +41,18 @@ def create_access_token(
     data: Optional[dict], # Additional data to include in the token payload (e.g., user roles, permissions)
     expires_delta: Optional[timedelta] = None
 ) -> str:
-    """Create a JWT access token with the given data and expiration time."""
+    """
+    Create a JWT access token with the given subject, additional data, and expiration time.
+    
+    :param subject: The subject of the token, typically a unique identifier for the user (e.g., user ID or email).
+    :type subject: Any
+    :param data: Additional data to include in the token payload, such as user roles or permissions. This will be merged with standard claims.
+    :type data: Optional[dict]
+    :param expires_delta: The time duration after which the token should expire. If not provided, a default expiration time will be used.
+    :type expires_delta: Optional[timedelta]
+    :return: The encoded JWT access token as a string.
+    :rtype: str
+    """
     # If no additional data is provided, initialize it as an empty dictionary
     if data is None:
         data = {}

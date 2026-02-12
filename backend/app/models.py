@@ -12,6 +12,9 @@ class BaseModel(DeclarativeBase):
 
 # User model representing a user in the system
 class User(BaseModel):
+    """
+    User model representing a user in the system. Each user has a unique email, a hashed password, and can have multiple transactions associated with them. The model includes fields for the user's full name, active status, and timestamps for creation and updates.
+    """
     __tablename__ = "users"
 
     # Unique identifier for the user, using UUID for better security and scalability
@@ -23,9 +26,13 @@ class User(BaseModel):
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
-    transaction = relationship("Transaction", back_populates="user")
+    transactions = relationship("Transaction", back_populates="user")
 
 class Category(BaseModel):
+    """
+    Category model representing a transaction category in the system. Each category can have multiple transactions associated with it.
+    The model includes fields for the category name, description, and timestamps for creation and updates.
+    """
     __tablename__ = "categories"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
@@ -34,9 +41,13 @@ class Category(BaseModel):
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
-    transaction = relationship("Transaction", back_populates="category")
+    transactions = relationship("Transaction", back_populates="category")
 
 class Transaction(BaseModel):
+    """
+    Transaction model representing a financial transaction in the system. Each transaction is associated with a user and a category.
+    The model includes fields for the transaction amount, currency, date, description, and timestamps for creation and updates.
+    """
     __tablename__ = "transactions"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
@@ -49,5 +60,5 @@ class Transaction(BaseModel):
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
-    category = relationship("Category", back_populates="transaction")
-    user = relationship("User", back_populates="transaction")
+    category = relationship("Category", back_populates="transactions")
+    user = relationship("User", back_populates="transactions")

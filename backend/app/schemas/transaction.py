@@ -9,7 +9,7 @@ class TransactionBase(BaseModel):
     currency: str = "USD"
     date: datetime
     description: Optional[str] = None
-    category_id: Optional[UUID] = None
+    category_id: Optional[UUID]
 
 class TransactionCreate(TransactionBase):
     pass

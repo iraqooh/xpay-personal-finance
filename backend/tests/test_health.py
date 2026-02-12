@@ -7,12 +7,18 @@ from app.dependencies import get_db # Import the database instance
 client = TestClient(xpay)
 
 def test_health_backend():
+    """
+    Test the backend health check endpoint to ensure it returns a healthy status when the backend is running.
+    """
     response = client.get("/health/backend")
 
     assert response.status_code == 200
     assert response.json() == {"status": "XPay backend is running"}
 
 def test_health_db_connected():
+    """
+    Test the database health check endpoint to ensure it returns a healthy status when the database connection is successful.
+    """
     response = client.get("/health/db")
 
     assert response.status_code == 200
