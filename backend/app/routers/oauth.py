@@ -8,7 +8,7 @@ from app.dependencies import get_db
 from app.models import User
 from app.core.security import create_access_token
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(prefix="/oauth", tags=["oauth"])
 
 @router.get("/google/login")
 async def google_login(request: Request):
@@ -57,6 +57,9 @@ async def google_callback(
 
     if not user:
         # If the user does not exist, create a new user record in the database
+        if not userinfo.get("name"):
+            userinfo["name"] = "Unknown Google User"
+        
         user = User(
             email=email,
             full_name=userinfo.get("name"),

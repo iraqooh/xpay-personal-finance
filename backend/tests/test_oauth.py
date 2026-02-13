@@ -25,10 +25,10 @@ def test_oauth_client_is_configured():
 
 def test_google_login_redirect():
     """
-    Test that the /auth/google/login endpoint correctly initiates the Google OAuth login flow by redirecting the user to Google's authorization endpoint.
-    This test verifies that when a GET request is made to the /auth/google/login endpoint, the response is a redirect (HTTP 302) to the Google authorization URL, and that the URL contains the expected query parameters for client_id, scope, response_type, and redirect_uri.
+    Test that the /oauth/google/login endpoint correctly initiates the Google OAuth login flow by redirecting the user to Google's authorization endpoint.
+    This test verifies that when a GET request is made to the /oauth/google/login endpoint, the response is a redirect (HTTP 302) to the Google authorization URL, and that the URL contains the expected query parameters for client_id, scope, response_type, and redirect_uri.
     """
-    response = client.get("/auth/google/login", follow_redirects=False) # Don't follow redirects to capture the initial response
+    response = client.get("/oauth/google/login", follow_redirects=False) # Don't follow redirects to capture the initial response
 
     assert response.status_code == 302
     location = response.headers["location"]
@@ -41,7 +41,7 @@ def test_google_login_redirect():
 
 @patch("app.core.oauth.oauth_client.google.authorize_access_token") # Mock the token exchange method to simulate a successful token exchange with Google during the OAuth callback
 @patch("app.core.oauth.oauth_client.google.userinfo") # Mock the user info retrieval method to simulate fetching user information from Google during the OAuth callback
-def test_google_callback_new_user(
+def test_google_callback_creates_new_user(
     mock_userinfo: AsyncMock,
     mock_get_token: AsyncMock
 ):
@@ -86,6 +86,47 @@ def test_google_callback_new_user(
                 return instance
         return MockDB()
     
+    # Override the get_db dependency with our mock function that simulates an empty database
+    xpay.dependency_overrides[get_db] = mock_get_db
+
+    # Simulate the callback from Google with a fake authorization code and state
+    response = client.get(
+        "/oauth/google/callback?code=fake-code&state=fake-state", 
+        follow_redirects=False
+    )
+
+    assert response.status_code == 307
+    location = response.headers["location"]
+
+    # Check that the redirect URL contains a token or access token, indicating successful login
+    assert "?token=" in location or "access_token" in location
+
+    xpay.dependency_overrides[get_db] = mock_get_db
+
+    response = client.get(
+        "/oauth/google/callback?code=fake-code&state=fake-state",
+        follow_redirects=False
+    )
+    assert response.status_code == 307
+    assert "access_token=" in response.headers["location"]
+
+    xpay.dependency_overrides.clear()
+
+@patch("app.core.oauth.oauth_client.google.authorize_access_token", new_callable=AsyncMock)
+@patch("app.core.oauth.oauth_client.google.userinfo", new_callable=AsyncMock)
+def test_google_callback_existing_user(mock_userinfo, mock_get_token):
+    """
+    Test the /auth/google/callback endpoint to ensure it correctly handles the OAuth callback from Google when the user already exists in the database.
+    This test simulates the OAuth callback by mocking the token exchange and user info retrieval to return
+    information for an existing user. It also mocks the database session to simulate an existing user in the database. The test verifies that the endpoint responds with a redirect containing an access token, indicating a successful login without creating a new user.
+    
+    :param mock_userinfo: Mock object for simulating the user info retrieval from Google during the OAuth callback.
+    :type mock_userinfo: AsyncMock
+    """
+    mock_get_token.return_value = {"access_token": "fake-token"}
+    mock_userinfo.return_value = {"sub": "google123", "email": "existing@example.com", "name": "Existing User"}
+
+    # Mock DB session with an existing user
     def mock_get_db_existing_user():
         """
         Mock database session that simulates an existing user in the database. This mock class provides the necessary methods to mimic the behavior of a SQLAlchemy session for the purposes of testing the OAuth callback endpoint when a user already exists.
@@ -104,29 +145,10 @@ def test_google_callback_new_user(
                 return User()  # Simulate user already exists
         return MockDB()
     
-    # Override the get_db dependency with our mock function that simulates an empty database
-    xpay.dependency_overrides[get_db] = mock_get_db
-
-    # Simulate the callback from Google with a fake authorization code and state
-    response = client.get(
-        "/auth/google/callback?code=fake-code&state=fake-state", 
-        follow_redirects=False
-    )
-
-    assert response.status_code == 307
-    location = response.headers["location"]
-
-    # Check that the redirect URL contains a token or access token, indicating successful login
-    assert "?token=" in location or "access_token" in location
-
     xpay.dependency_overrides[get_db] = mock_get_db_existing_user
 
-    response = client.get(
-        "/auth/google/callback?code=fake-code&state=fake-state",
-        follow_redirects=False
-    )
+    response = client.get("/oauth/google/callback?code=fake-code&state=fake-state", follow_redirects=False)
     assert response.status_code == 307
     assert "access_token=" in response.headers["location"]
 
     xpay.dependency_overrides.clear()
-
