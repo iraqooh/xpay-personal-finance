@@ -1,20 +1,21 @@
 from fastapi.testclient import TestClient
 import pytest
 from sqlalchemy.orm import Session, sessionmaker
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 import os
+from dotenv import load_dotenv
 
 from app.xpay import xpay
 from app.core.security import get_password_hash
 from app.models import User, BaseModel
 from app.dependencies import get_db
 
-
 # ── Use test DB BEFORE app starts ────────────────────────────────────────────
 
-os.environ["DATABASE_URL"] = "postgresql://postgres:asdfghjkl@localhost:5432/xpay_test_db"
-
-TEST_DATABASE_URL = os.environ["DATABASE_URL"]
+load_dotenv()
+TEST_DATABASE_URL = os.getenv("TEST_DATABASE_URL")
+if not TEST_DATABASE_URL:
+    raise RuntimeError("TEST_DATABASE_URL environment variable must be set for tests")
 
 engine = create_engine(
     TEST_DATABASE_URL,
@@ -50,6 +51,16 @@ def db():
     transaction = connection.begin()
 
     session = TestingSessionLocal(bind=connection)
+
+    # Begin a SAVEPOINT (nested transaction)
+    nested = connection.begin_nested()
+
+    # Re-create SAVEPOINT after each commit inside the session
+    @event.listens_for(session, "after_transaction_end")
+    def restart_savepoint(session, transaction_):
+        nonlocal nested
+        if not nested.is_active:
+            nested = connection.begin_nested()
 
     yield session
 

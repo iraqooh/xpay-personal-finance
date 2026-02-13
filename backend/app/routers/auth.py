@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy.exc import IntegrityError
 
 from ..schemas import UserCreate, AuthResponse, UserRead
 from ..dependencies import get_db
@@ -25,17 +26,21 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     if existing_user:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
 
-    # Create a new user
-    new_user = User(
-        email=user.email, 
-        hashed_password=get_password_hash(user.password),
-        full_name=user.full_name
-    )
-
-    # Save the new user to the database
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+    try:
+        # Create a new user
+        new_user = User(
+            email=user.email, 
+            hashed_password=get_password_hash(user.password),
+            full_name=user.full_name
+        )
+        
+        # Save the new user to the database
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
 
     access_token = create_access_token(subject=str(new_user.id))
 
@@ -78,6 +83,7 @@ def login(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
     # Create an access token for the authenticated user

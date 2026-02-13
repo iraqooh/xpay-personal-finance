@@ -57,6 +57,9 @@ async def google_callback(
 
     if not user:
         # If the user does not exist, create a new user record in the database
+        if not userinfo.get("name"):
+            userinfo["name"] = "Unknown Google User"
+        
         user = User(
             email=email,
             full_name=userinfo.get("name"),
