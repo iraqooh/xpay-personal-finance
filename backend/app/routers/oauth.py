@@ -8,7 +8,7 @@ from app.dependencies import get_db
 from app.models import User
 from app.core.security import create_access_token
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(prefix="/oauth", tags=["oauth"])
 
 @router.get("/google/login")
 async def google_login(request: Request):

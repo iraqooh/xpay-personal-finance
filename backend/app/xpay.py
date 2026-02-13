@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 from .models import BaseModel
 from .database import db_engine
-from .routers import health_check, oauth
+from .routers import health_check, oauth, auth
 
 load_dotenv()  # Load environment variables from .env file
 
@@ -34,3 +34,4 @@ xpay.add_middleware(
 )
 xpay.include_router(health_check.router)
 xpay.include_router(oauth.router)
+xpay.include_router(auth.router)

@@ -28,7 +28,7 @@ def test_google_login_redirect():
     Test that the /auth/google/login endpoint correctly initiates the Google OAuth login flow by redirecting the user to Google's authorization endpoint.
     This test verifies that when a GET request is made to the /auth/google/login endpoint, the response is a redirect (HTTP 302) to the Google authorization URL, and that the URL contains the expected query parameters for client_id, scope, response_type, and redirect_uri.
     """
-    response = client.get("/auth/google/login", follow_redirects=False) # Don't follow redirects to capture the initial response
+    response = client.get("/oauth/google/login", follow_redirects=False) # Don't follow redirects to capture the initial response
 
     assert response.status_code == 302
     location = response.headers["location"]
@@ -109,7 +109,7 @@ def test_google_callback_new_user(
 
     # Simulate the callback from Google with a fake authorization code and state
     response = client.get(
-        "/auth/google/callback?code=fake-code&state=fake-state", 
+        "/oauth/google/callback?code=fake-code&state=fake-state", 
         follow_redirects=False
     )
 
@@ -122,7 +122,7 @@ def test_google_callback_new_user(
     xpay.dependency_overrides[get_db] = mock_get_db_existing_user
 
     response = client.get(
-        "/auth/google/callback?code=fake-code&state=fake-state",
+        "/oauth/google/callback?code=fake-code&state=fake-state",
         follow_redirects=False
     )
     assert response.status_code == 307

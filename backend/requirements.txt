@@ -12,3 +12,4 @@ authlib
 itsdangerous
 cryptography
 email-validator
+python-multipart

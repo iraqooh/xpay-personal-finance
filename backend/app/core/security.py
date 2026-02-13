@@ -41,7 +41,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 60))
 
 def create_access_token(
     subject: Any, # The subject can be any data that identifies the user (e.g., user ID or email)
-    data: Optional[dict], # Additional data to include in the token payload (e.g., user roles, permissions)
+    data: Optional[dict] = None, # Additional data to include in the token payload (e.g., user roles, permissions)
     expires_delta: Optional[timedelta] = None
 ) -> str:
     """
